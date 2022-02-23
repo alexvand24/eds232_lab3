@@ -1,0 +1,166 @@
+---
+title: "Lab 3 - Reserve Design"
+author: "Alex Vand"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    number_sections: true
+    code_folding: hide
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+
+# Intro
+
+```{r}
+if (!require("librarian")){
+  install.packages("librarian")
+  library(librarian)
+}
+librarian::shelf(
+  assertthat, BiocManager, dplyr, gridExtra, here, mapview, 
+  prioritizr, prioritizrdata, 
+  raster, remotes, rgeos, rgdal, scales, sf, sp, stringr,
+  units)
+if (!require("lpsymphony")){
+  BiocManager::install("lpsymphony")
+  library(lpsymphony)
+}
+```
+
+```{r}
+dir_data <- here("data/prioritizr")
+pu_shp   <- file.path(dir_data, "pu.shp")
+pu_url   <- "https://github.com/prioritizr/massey-workshop/raw/main/data.zip"
+pu_zip   <- file.path(dir_data, basename(pu_url))
+vegetation_tif <- file.path(dir_data, "vegetation.tif")
+
+dir.create(dir_data, showWarnings = F, recursive = T)
+if (!file.exists(pu_shp)){
+  download.file(pu_url, pu_zip)
+  unzip(pu_zip, exdir = dir_data)
+  dir_unzip   <- file.path(dir_data, "data")
+  files_unzip <- list.files(dir_unzip, full.names = T)
+  file.rename(
+    files_unzip, 
+    files_unzip %>% str_replace("prioritizr/data", "prioritizr"))
+  unlink(c(pu_zip, dir_unzip), recursive = T)
+}
+```
+
+# Data
+
+```{r}
+n_features <- raster::nlayers(raster::stack(vegetation_tif))
+```
+
+
+```{r}
+# import planning unit data
+pu_data <- as(read_sf(pu_shp), "Spatial")
+
+# format columns in planning unit data
+pu_data$locked_in <- as.logical(pu_data$locked_in)
+pu_data$locked_out <- as.logical(pu_data$locked_out)
+
+# import vegetation data
+veg_data <- stack(vegetation_tif)
+```
+
+
+```{r}
+# print a short summary of the data
+print(pu_data)
+```
+
+```{r}
+# plot the planning unit data
+plot(pu_data)
+```
+
+```{r}
+# plot an interactive map of the planning unit data
+mapview(pu_data)
+```
+
+```{r}
+# print the structure of object
+str(pu_data, max.level = 2)
+```
+
+```{r}
+# print the class of the object
+class(pu_data)
+```
+
+```{r}
+# print the slots of the object
+slotNames(pu_data)
+```
+
+```{r}
+# print the coordinate reference system
+print(pu_data@proj4string)
+```
+
+```{r}
+# print number of planning units (geometries) in the data
+nrow(pu_data)
+```
+
+```{r}
+# print the first six rows in the data
+head(pu_data@data)
+```
+
+
+```{r}
+# print the first six values in the cost column of the attribute data
+head(pu_data$cost)
+```
+
+```{r}
+# print the highest cost value
+max(pu_data$cost)
+```
+
+```{r}
+# print the smallest cost value
+min(pu_data$cost)
+```
+
+```{r}
+# print average cost value
+mean(pu_data$cost)
+```
+
+
+```{r}
+# plot a map of the planning unit cost data
+spplot(pu_data, "cost")
+```
+
+```{r}
+# plot an interactive map of the planning unit cost data
+mapview(pu_data, zcol = "cost")
+```
+
+
+
+## Questions
+1.
+2.
+3.
+
+# Gap analysis
+
+
+# Spatial prioritizations
+
+
+
+
